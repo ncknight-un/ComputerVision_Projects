@@ -10,10 +10,44 @@ import numpy as np
 
 
 # Functions:
+def CCL_NoiseRemoval(img: Image, max_area: int): 
+    # I am choosing to include noise reduction in the CCL Function to remove small groups
+    #   that have an area smaller than max area.
+
+    # Loop through the current CCL image and create a table of each 
+    L = np.array(img)
+    rows, cols = L.shape
+
+    # Create a table of each classified group and count how many pixels are in that group: 
+    Area_Map = {}
+    for u in range(rows):
+        for v in range(cols):
+            if L[u, v] != 0:
+                if L[u,v] in Area_Map:
+                    Area_Map[L[u, v]] += 1
+                else:
+                    Area_Map[L[u, v]] = 1
+    
+    # Loop through the image a second time, and if the area for that group is smaller than max_area, set its value to background:
+    for u in range(rows):
+        for v in range(cols):
+            if L[u, v] != 0 and Area_Map[L[u, v]] <= max_area:
+                L[u, v] = 0
+
+    # Get the updated number of groups: 
+    updated_groups = 0
+    for group in Area_Map:
+        if Area_Map[group] > max_area:
+            updated_groups += 1
+    
+    # Convert array back to an image, and return updated groups:
+    denoised_img = Image.fromarray(L.astype(np.uint8))
+    return denoised_img, updated_groups
+
 def CCL(img: Image):
     # Use the CCL Algorithm on the input image and output the result and number of groups:
     # Convert the image to an array:
-    im_arr = np.asarray(img)
+    im_arr = np.array(img)
 
     # Create the labeled_image array
     rows, cols = im_arr.shape
@@ -100,7 +134,7 @@ def CCL(img: Image):
     updated_num = len(np.unique(L)) - 1      # Ignore no labeled values
 
     # Shift the color scale for the groups to show visual differences:
-    L = 4*(updated_num)*L     # Custom scalling to shift color groups for visualization
+    L = 5*updated_num*L     # Custom scalling to shift color groups for visualization
 
     # Convert the array back to an image and return the new CCL image and number of labels:
     label_img = Image.fromarray(L.astype(np.uint8))
@@ -126,8 +160,11 @@ def main():
     gun_im = Image.open("gun.bmp")
     labeled_Gun_im, Gun_num = CCL(gun_im)
     labeled_Gun_im.show()
-    labeled_Gun_im.save("gun_labeled.bmp")
-    print("Number of labels for gun.bmp: " + str(Gun_num))
+    # Denoise the gun image with an area of 500 pixels
+    denoised_Gun_im, den_Gun_num = CCL_NoiseRemoval(labeled_Gun_im, 500)
+    denoised_Gun_im.show()
+    denoised_Gun_im.save("gun_denoised_labeled.bmp")
+    print("Number of labels for gun.bmp: " + str(den_Gun_num))
 
 
 # Main execution:
