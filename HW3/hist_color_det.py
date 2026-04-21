@@ -124,9 +124,11 @@ def main():
     train2 = collectTrain(pointIm)
     gunIm = Image.open("gun1.bmp")
     train3 = collectTrain(gunIm)
+    fistIm = Image.open("fist.bmp")
+    train4 = collectTrain(fistIm)
 
     # Concatinate Training Data:
-    fullTrain = np.vstack((train1, train2, train3))
+    fullTrain = np.vstack((train1, train2, train3, train4))
     print(f"A total of f{fullTrain.shape[0]} pixels have been collected for training")
 
     # I have chosen to use HSI for my training step:
@@ -154,6 +156,8 @@ def main():
     test2.save("point_skinsegmented.bmp")
     test3 = segSkin(HS_hist, gunIm)
     test3.save("gun_skinsegmented.bmp")
+    test4 = segSkin(HS_hist, fistIm)
+    test4.save("fist_skinsegmented.bmp")
     print("The Test images have been segmented to isolate skin pigment")
 
 
