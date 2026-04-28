@@ -126,7 +126,7 @@ def HistoEqualization(in_img: Image):
 
     # Build a Histogram of the Original Image:
     H = [0] * 256       # Setting the max of 256 labels
-    for u in range(rows): 
+    for u in range(rows):
         for v in range(cols): 
             H[in_array[u, v]] += 1
 
